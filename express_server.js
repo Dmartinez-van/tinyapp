@@ -4,7 +4,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080;
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Set ejs as view engine
@@ -103,7 +103,7 @@ app.get("/urls.json", (req, res) => {
 // Function(s)
 //
 
-const generateRandomString = function() {
+const generateRandomString = function () {
   let randString = (Math.random() + 1).toString(36).substring(2, 8);
   return randString;
 };
