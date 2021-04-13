@@ -44,7 +44,6 @@ app.get("/urls/:shortURL", (req, res) => {
   let longURL = urlDatabase[shortURL];
   // Set templateVars from the url provided from get method and the database
   const templateVars = { shortURL, longURL };
-  // res.redirect(longURL);
   res.render("urls_show", templateVars);
 });
 
@@ -53,6 +52,11 @@ app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[shortURL];
   // USER MUST TYPE IN HTTP:// in order for this to work.
   res.redirect(longURL);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => {
