@@ -17,7 +17,7 @@ const urlDatabase = {
 };
 
 //
-// Main Page
+// Main Pages
 //
 
 app.get("/", (req, res) => {
@@ -35,6 +35,11 @@ app.post("/urls", (req, res) => {
   // body-parser is a middleware which is populating the req.body object
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  res.render("register", templateVars);
 });
 
 //
