@@ -30,6 +30,7 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   // Grab whatever user enters into the form and set it as the value to the generated short URL key
+  // body-parser is a middleware which is populating the req.body object
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
