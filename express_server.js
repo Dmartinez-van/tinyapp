@@ -16,6 +16,10 @@ const urlDatabase = {
   "SVB-Twitch": "https://www.twitch.tv/owsvb"
 };
 
+//
+// Main Page
+//
+
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -24,6 +28,18 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   res.render("urls_index", templateVars);
 });
+
+app.post("/urls", (req, res) => {
+  let shortURL = generateRandomString();
+  // Grab whatever user enters into the form and set it as the value to the generated short URL key
+  // body-parser is a middleware which is populating the req.body object
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
+});
+
+//
+// Header stuff
+//
 
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
@@ -35,13 +51,9 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
-  // Grab whatever user enters into the form and set it as the value to the generated short URL key
-  // body-parser is a middleware which is populating the req.body object
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
-});
+//
+// New urls
+//
 
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
@@ -70,14 +82,26 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+//
+// Delete
+//
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
+//
+// Read
+//
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
+//
+// Function(s)
+//
 
 const generateRandomString = function() {
   let randString = (Math.random() + 1).toString(36).substring(2, 8);
