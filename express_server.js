@@ -16,6 +16,19 @@ const urlDatabase = {
   "SVB-Twitch": "https://www.twitch.tv/owsvb"
 };
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
 //
 // Main Pages
 //
@@ -57,8 +70,22 @@ app.post("/logout", (req, res) => {
 });
 
 //
-// New urls
+// Create (Update)
 //
+
+app.post("/register", (req, res) => {
+  let newUser = {
+    id: generateRandomString(),
+    email: req.body.email,
+    password: req.body.password
+  };
+
+  users[newUser.id] = newUser;
+  
+  res.cookie('user_id', newUser.id);
+
+  res.redirect("/urls");
+});
 
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
