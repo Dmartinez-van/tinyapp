@@ -18,9 +18,9 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
@@ -28,8 +28,10 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the server console
-  res.send("Ok"); // Respond with 'Ok' (we will do this replacement)
+  let shortURL = generateRandomString();
+  // Grab whatever user enters into the form and set it as the value to the generated short URL key
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -37,8 +39,20 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
+  // req.params.shortURL points to the ' :/shortURL ' in the url. Which is whatever we generated from the app.post generateRandomString() block.
+  let shortURL = req.params.shortURL;
+  let longURL = urlDatabase[shortURL];
+  // Set templateVars from the url provided from get method and the database
+  const templateVars = { shortURL, longURL };
+  // res.redirect(longURL);
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  let shortURL = req.params.shortURL;
+  let longURL = urlDatabase[shortURL];
+  // USER MUST TYPE IN HTTP:// in order for this to work.
+  res.redirect(longURL);
 });
 
 app.get("/urls.json", (req, res) => {
