@@ -38,7 +38,7 @@ app.post("/urls", (req, res) => {
 });
 
 //
-// Header stuff
+// Header stuff. Okay?
 //
 
 app.post("/login", (req, res) => {
