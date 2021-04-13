@@ -14,7 +14,6 @@ const urlDatabase = {
   "SVB-Twitch": "https://www.twitch.tv/owsvb"
 };
 
-
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -49,6 +48,11 @@ app.get("/urls.json", (req, res) => {
 // app.get("/urls/:id", (req, res) => {
 //   res.json(urlDatabase);
 // });
+
+const generateRandomString = function() {
+  let randString = (Math.random() + 1).toString(36).substring(2, 8);
+  return randString;
+};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
