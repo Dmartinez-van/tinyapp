@@ -1,9 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080;
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 // Set ejs as view engine
 app.set("view engine", "ejs");
@@ -14,16 +16,16 @@ const urlDatabase = {
   "SVB-Twitch": "https://www.twitch.tv/owsvb"
 };
 
+//
+// Main Page
+//
+
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   res.render("urls_index", templateVars);
 });
 
@@ -43,7 +45,8 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -51,7 +54,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = urlDatabase[shortURL];
   // Set templateVars from the url provided from get method and the database
-  const templateVars = { shortURL, longURL };
+  const templateVars = { shortURL, longURL, username: req.cookies["username"] };
   res.render("urls_show", templateVars);
 });
 
@@ -62,18 +65,26 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+//
+// Delete
+//
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
+//
+// Read
+//
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// app.get("/urls/:id", (req, res) => {
-//   res.json(urlDatabase);
-// });
+//
+// Function(s)
+//
 
 const generateRandomString = function() {
   let randString = (Math.random() + 1).toString(36).substring(2, 8);
