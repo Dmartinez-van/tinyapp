@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <title>URL - TinyApp Example</title>
+</head>
+<body>
+  <%- include ('partials/_header') %>
+  <h1 style="text-align: center;">Welcome to the LOGIN page</h1>
+  <% if(userid) { %>
+    <h5 class="card-title mr-sm-2" style="margin: auto; padding-right: 5px;">Logged In As: <%= users[userid].email %>
+    </h5>
+    <form class="form-inline" action="/logout" method="POST">
+      <button type="submit" class="btn btn-secondary">Logout</button>
+      
+    </form>
+    <% } else { %>
+      <h6 style="color: red;">Login does not exist</h6>
+      <p style="color: red;">Try again</p>
+      <form class="form-inline" action="/login" method="POST">
+        <input style="text-align: center;" class="form-control" name="email" placeholder="email">
+        <input style="text-align: center" class="form-control" name="password" type="password" placeholder="password">
+        <button style="text-align: center" type="submit" class="btn btn-primary">Login</button>
+      </form>
+      <% } %>
+  
+</body>
+</html>

@@ -84,6 +84,22 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+app.get("/login", (req, res) => {
+  let shortURL = req.params.shortURL;
+  let longURL = urlDatabase[shortURL];
+  const templateVars = { shortURL, longURL, users: users, userid: req.cookies['userid'] };
+  res.render("login", templateVars);
+});
+
+// // // // // // Seperate login page for when the login does not exist // // //
+// app.get("/login/oops", (req, res) => {
+//   let shortURL = req.params.shortURL;
+//   let longURL = urlDatabase[shortURL];
+//   const templateVars = { shortURL, longURL, users: users, userid: req.cookies['userid'] };
+//   res.render("login_oops", templateVars);
+// });
+// // // // // // // // // // // // // // // // // // // // // // // // // // //
+
 //
 // Login & Logout
 //
@@ -92,10 +108,12 @@ app.post("/login", (req, res) => {
   for (const userID in users) {
     if (users[userID].email && users[userID].password === req.body.password) {
       res.cookie("userid", userID);
+      res.redirect("/urls");
     }
   }
-  res.redirect("/urls");
+  res.send(`Error ${res.statusCode = 403}:` + "\nForbidden");
 });
+
 
 app.post("/logout", (req, res) => {
   res.clearCookie('userid');

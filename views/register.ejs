@@ -8,13 +8,19 @@
 </head>
 <body>
   <%- include ('partials/_header') %>
+  <h2>Create Account</h2>
   <form class="form-inline" action="/register" method="POST">
+  <span>
     <label for="email">Email</label>
-    <input class="form-control" type="email" name="email" placeholder="example@email.com"> 
+    <input class="form-control" type="email" name="email" placeholder="Enter email">
+  </span>
+  <span>
     <label for="password">Password</label>
-    <input class="form-control" type="password" name="password" placeholder="password"> 
+    <input class="form-control" type="password" name="password" placeholder="Enter password">
+  </span>
+  <span>
     <button type="submit" class="btn btn-primary">Register</button>
+  </span>
   </form>
-  
 </body>
 </html>
