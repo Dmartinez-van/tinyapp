@@ -38,7 +38,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const templateVars = { urls: urlDatabase, users: users, userid: req.cookies['userid']};
   res.render("urls_index", templateVars);
 });
 
@@ -51,21 +51,20 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const templateVars = { urls: urlDatabase, users: users, userid: req.cookies['userid'] };
   res.render("register", templateVars);
 });
 
 //
-// Header stuff. Okay?
+// Header stuff
 //
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('userid');
   res.redirect("/urls");
 });
 
@@ -82,7 +81,7 @@ app.post("/register", (req, res) => {
 
   users[newUser.id] = newUser;
   
-  res.cookie('user_id', newUser.id);
+  res.cookie('userid', newUser.id);
 
   res.redirect("/urls");
 });
@@ -90,11 +89,11 @@ app.post("/register", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   urlDatabase[shortURL] = req.body.longURL;
-  res.redirect('/urls/');
+  res.redirect('/urls');
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { users: users, userid: req.cookies['userid'] };
   res.render("urls_new", templateVars);
 });
 
@@ -103,7 +102,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = urlDatabase[shortURL];
   // Set templateVars from the url provided from get method and the database
-  const templateVars = { shortURL, longURL, username: req.cookies["username"] };
+  const templateVars = { shortURL, longURL, users: users, userid: req.cookies['userid'] };
   res.render("urls_show", templateVars);
 });
 
