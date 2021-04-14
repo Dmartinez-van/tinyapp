@@ -88,19 +88,19 @@ app.post("/register", (req, res) => {
   if (checkForDuplicate(req.body.email)) {
     res.status(400);
     res.send(`Error ${res.statusCode}\nThis email has already been registered.`);
+  } else {
+    let newUser = {
+      id: generateRandomString(),
+      email: req.body.email,
+      password: req.body.password
+    };
+  
+    users[newUser.id] = newUser;
+    
+    res.cookie('userid', newUser.id);
+  
+    res.redirect("/urls");
   }
-  
-  let newUser = {
-    id: generateRandomString(),
-    email: req.body.email,
-    password: req.body.password
-  };
-
-  users[newUser.id] = newUser;
-  
-  res.cookie('userid', newUser.id);
-
-  res.redirect("/urls");
 });
 
 app.post("/urls/:shortURL", (req, res) => {
