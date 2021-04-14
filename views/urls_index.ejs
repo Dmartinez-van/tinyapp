@@ -26,22 +26,40 @@
         </thead>
         <tbody>
           <% for(let url in urls) { %>
-            <tr>
-              <td><a href="<%= urls[url].longURL %>">
-                  <%= url %>
-                </a></td>
-              <td>
-                <%= urls[url].longURL %>
-              </td>
-              <td>
-                <form method="GET" action="/urls/<%= url %>"><button style="background-color:blue; color:white"
-                    type="submit">EDIT</button></form>
-              </td>
-              <td>
-                <form method="POST" action="/urls/<%= url %>/delete"><button style="background-color: red; color:white"
-                    type="submit">DELETE</button></form>
-              </td>
-            </tr>
+            <% if(urls[url].userID === userid) { %>
+              <tr>
+                <td><a href="<%= urls[url].longURL %>"><%= url %></a></td>
+                <td><%= urls[url].longURL %></td>
+                <td><form method="GET" action="/urls/<%= url %>"><button style="background-color:blue; color:white" type="submit">EDIT</button></form></td>
+                <td><form method="POST" action="/urls/<%= url %>/delete"><button style="background-color: red; color:white" type="submit">DELETE</button></form></td>
+              </tr>
+              <% } %>  
+            <% } %>
+            <% if (!userid) { %>
+              <th style="background-color: aqua; text-align: center; text-shadow: 1px 1px #FF0000;">Login to view</th>
+              <% } %>
+        </tbody>
+      </table>
+      <h3>Free Shortened URLs</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Short URL</th>
+            <th scope="col">Long URL</th>
+            <th scope="col">EDIT</th>
+            <th scope="col">DELETE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(let url in urls) { %>
+            <% if(urls[url].userID === 'testUser') { %>
+              <tr>
+                <td><a href="<%= urls[url].longURL %>"><%= url %></a></td>
+                <td><%= urls[url].longURL %></td>
+                <td><form method="GET" action="/urls/<%= url %>"><button style="background-color:blue; color:white" type="submit">EDIT</button></form></td>
+                <td><form method="POST" action="/urls/<%= url %>/delete"><button style="background-color: red; color:white" type="submit">DELETE</button></form></td>
+              </tr>
+              <% } %>
             <% } %>
         </tbody>
       </table>

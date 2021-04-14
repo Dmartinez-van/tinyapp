@@ -91,6 +91,7 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let personalURL = {};
+  console.log(urlDatabase);
   
   const templateVars = { urls: urlDatabase, users: users, userid: req.cookies['userid'] };
   res.render("urls_index", templateVars);
@@ -195,6 +196,7 @@ app.post("/register", (req, res) => {
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
+  console.log("post", shortURL);
   // Grab whatever user enters into the form and set it as the value to the generated short URL key
   // body-parser is a middleware which is populating the req.body object
   urlDatabase[shortURL] = {};
