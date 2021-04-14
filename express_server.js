@@ -39,6 +39,7 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, users: users, userid: req.cookies['userid']};
+  console.log(users);
   res.render("urls_index", templateVars);
 });
 
@@ -60,6 +61,11 @@ app.get("/register", (req, res) => {
 //
 
 app.post("/login", (req, res) => {
+  for (const userID in users) {
+    if (users[userID].email && users[userID].password === req.body.password) {
+      res.cookie("userid", userID);
+    }
+  }
   res.redirect("/urls");
 });
 
@@ -73,6 +79,17 @@ app.post("/logout", (req, res) => {
 //
 
 app.post("/register", (req, res) => {
+  
+  if (!req.body.email || !req.body.password) {
+    res.status(400);
+    res.send(`Error ${res.statusCode}\nPlease ensure the email and password fields are filled out.`);
+  }
+  
+  if (checkForDuplicate(req.body.email)) {
+    res.status(400);
+    res.send(`Error ${res.statusCode}\nThis email has already been registered.`);
+  }
+  
   let newUser = {
     id: generateRandomString(),
     email: req.body.email,
@@ -92,6 +109,9 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect('/urls');
 });
 
+// Add a toggle option to select either http:// or https://
+// User must pick one of the other in order to create new shortURL
+// Apply this to Edit featuer as well
 app.get("/urls/new", (req, res) => {
   const templateVars = { users: users, userid: req.cookies['userid'] };
   res.render("urls_new", templateVars);
@@ -134,9 +154,22 @@ app.get("/urls.json", (req, res) => {
 // Function(s)
 //
 
-const generateRandomString = function () {
+const generateRandomString = function() {
   let randString = (Math.random() + 1).toString(36).substring(2, 8);
   return randString;
+};
+
+// return true for duplicate, false for no duplicate
+const checkForDuplicate = function(newEmail) {
+  // console.log("check for ", newEmail, "in users databse------");
+  for (const user in users) {
+    // console.log("Checking...", user);
+    // console.log("for...", newEmail);
+    if (users[user].email === newEmail) {
+      return true;
+    }
+  }
+  return false;
 };
 
 app.listen(PORT, () => {
