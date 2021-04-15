@@ -81,7 +81,10 @@ const urlsForUser = function(id) {
 //
 
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  if (req.cookies['userid']) {
+    res.redirect("/urls");
+  }
+  res.redirect("/login");
 });
 
 // Main page - URLs specific to user logged in
@@ -195,7 +198,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL].longURL = req.body.longURL;
   urlDatabase[shortURL].userID = req.cookies.userid;
   
-  res.redirect(`/urls`);
+  res.redirect(`/urls/${shortURL}`);
 });
 
 // Edit
