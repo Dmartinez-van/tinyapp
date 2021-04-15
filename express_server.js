@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+// const morgan = require("morgan");
 const bcrypt = require('bcrypt');
 
 const app = express();
@@ -12,6 +13,7 @@ const PORT = 8080;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+// app.use(morgan('dev'));
 
 //
 // Set ejs as view engine
@@ -34,18 +36,7 @@ const urlDatabase = {
   }
 };
 
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
+const users = {};
 
 //
 // Function(s)
@@ -91,6 +82,7 @@ app.get("/", (req, res) => {
 // Main page - URLs specific to user logged in
 app.get("/urls", (req, res) => {
   const templateVars = { userURls: urlsForUser(req.cookies['userid']), urls: urlDatabase, users: users, userid: req.cookies['userid'] };
+  console.log(users);
   console.log(users);
   res.render("urls_index", templateVars);
 });
@@ -153,7 +145,7 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
   for (const userID in users) {
-    if (users[userID].email && users[userID].password === req.body.password) {
+    if ((users[userID].email === req.body.email) && bcrypt.compareSync(req.body.password ,users[userID].password)) {
       res.cookie("userid", userID);
       res.redirect("/urls");
     }
