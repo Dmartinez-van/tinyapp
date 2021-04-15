@@ -11,7 +11,7 @@
   <%- include ('partials/_header') %>
     <h1 style="text-align: center;">Welcome to the LOGIN page</h1>
     <% if(userid) { %>
-      <h5 class="card-title mr-sm-2" style="margin: auto; padding-right: 5px;">Logged In As: <%= users[userid].email %></h5>
+      <h5 style="margin: left;">Logged In As: <%= users[userid].email %></h5>
       <form class="form-inline" action="/logout" method="POST">
         <button type="submit" class="btn btn-secondary">Logout</button>
       </form>
@@ -23,10 +23,9 @@
           </span>
           <span>
             <label for="password">Password</label>
-            <input style="text-align: center" class="form-control" name="password" type="password"
-              placeholder="Enter password">
+            <input style="text-align: center; margin-left: 1em" class="form-control" name="password" type="password" placeholder="Enter password">
+            <button style="text-align: center;" type="submit" class="btn btn-primary">Login</button>
           </span>
-          <button style="text-align: center" type="submit" class="btn btn-primary">Login</button>
         </form>
         <% } %>
 

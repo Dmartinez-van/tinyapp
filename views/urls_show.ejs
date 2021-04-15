@@ -17,11 +17,10 @@
         <p class="card-text">ShortURL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
         <div style="background-color: chartreuse;">
           <h4 class="card-title" style="background-color: brown; margin: auto">Edit</h5>
+            <label for="longURL" style="align-content: center;">New URL:</label>
             <form class="form-inline" action="/urls/<%= shortURL %>" method="POST">
-              <label for="longURL" style="margin-left: 100px;">New URL:</label>
-              <input class="form-control" type="text" name="longURL" value="<%= longURL %>"
-                style="background-color:aquamarine ;width: 300px; margin:10px">
-              <button type="submit" style="margin: 1em;" class="btn btn-primary">Update</button>
+              <input class="form-control" type="text" name="longURL" value="<%= longURL %>" style="text-align: center; align-content: center;">
+              <button type="submit" class="btn btn-primary" style="margin-left: 1em;">Update</button>
             </form>
   <% } else { %>
     <h3>This doesn't belong to you</h3>

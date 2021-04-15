@@ -19,7 +19,6 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
-// app.use(morgan('dev'));
 
 //
 // Set ejs as view engine
@@ -45,7 +44,7 @@ const urlDatabase = {
 const users = {};
 
 //
-// Main Pages
+// GET - Main Pages
 //
 
 app.get("/", (req, res) => {
@@ -55,10 +54,9 @@ app.get("/", (req, res) => {
   res.redirect("/login");
 });
 
-// Main page - URLs specific to user logged in
+// Main page - Show URLs specific to user logged in
 app.get("/urls", (req, res) => {
   const templateVars = { userURls: helpers.urlsForUser(req.session.userid, urlDatabase), urls: urlDatabase, users: users, userid: req.session.userid };
-  console.log("users database -> ", users);
   res.render("urls_index", templateVars);
 });
 
@@ -68,7 +66,7 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
-// Create url page
+// Create new shorten url page - Disallow those not logged in to view
 app.get("/urls/new", (req, res) => {
   const templateVars = { users: users, userid: req.session.userid };
   if (req.session.userid) {
@@ -77,7 +75,7 @@ app.get("/urls/new", (req, res) => {
   res.redirect("/login");
 });
 
-// After createing new URL, show this page
+// Results page of shortened URL creation - Disallow anyone besides who created it from viewing/editing link
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = helpers.urlsForUser(req.session.userid, urlDatabase)[shortURL];
@@ -88,7 +86,7 @@ app.get("/urls/:shortURL", (req, res) => {
   return res.send("You did not create this link, so you may not Edit it");
 });
 
-// Redirect user to longURL website
+// Redirect user to longURL website - Redirect users not logged in / Or those who did not create the link
 app.get("/u/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   if (!req.session.userid) {
@@ -101,14 +99,14 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-// Display login page
+// Login page
 app.get("/login", (req, res) => {
   const templateVars = { users: users, userid: req.session.userid };
   res.render("login", templateVars);
 });
 
 //
-// Login & Logout
+// POST - Login & Logout
 //
 
 app.post("/login", (req, res) => {
@@ -144,32 +142,32 @@ app.post("/logout", (req, res) => {
 });
 
 //
-// Register & Create URLs
+// POST/PATCH - Register & Create URLs
 //
 
 // New user register
 app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
-    res.status(400);
-    res.send(`Error ${res.statusCode}\nPlease ensure the email and password fields are filled out.`);
-  }
-  if (helpers.checkForDuplicate(req.body.email, users)) {
-    res.status(400);
-    return res.send(`Error ${res.statusCode}\nThis email has already been registered.`);
+    return res.status(400).send(`Error ${res.statusCode}: Please ensure the email and password fields are filled out.`);
   }
 
+  if (helpers.checkForDuplicate(req.body.email, users)) {
+    return res.status(400).send(`Error ${res.statusCode}: This email has already been registered.`);
+  }
+  
+  // Add user to database with the user entered information
   let newUser = {
     id: helpers.generateRandomString(),
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 10)
   };
-
   users[newUser.id] = newUser;
+
   req.session.userid = newUser.id;
   res.redirect("/urls");
 });
 
-// Generate shortURL and add to urlDatabase along with the userID that created it
+// Create shortURL and add to urlDatabase along with the userID that created it
 app.post("/urls", (req, res) => {
   let shortURL = helpers.generateRandomString();
   urlDatabase[shortURL] = {};
@@ -179,7 +177,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// Edit
+// Edit the longURL that a specific shortURL points towards - Disallow others from editing
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   if (req.session.userid === urlDatabase[req.params.shortURL].userID) {
@@ -189,7 +187,7 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 //
-// Delete
+// Delete - Disallow anyone besides the user who created it from deleting
 //
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -197,14 +195,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[req.params.shortURL];
   }
   res.redirect("/urls");
-});
-
-//
-// Read JSON
-//
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
 });
 
 app.listen(PORT, () => {
