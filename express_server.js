@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcrypt');
 
 const app = express();
 const PORT = 8080;
@@ -90,6 +91,7 @@ app.get("/", (req, res) => {
 // Main page - URLs specific to user logged in
 app.get("/urls", (req, res) => {
   const templateVars = { userURls: urlsForUser(req.cookies['userid']), urls: urlDatabase, users: users, userid: req.cookies['userid'] };
+  console.log(users);
   res.render("urls_index", templateVars);
 });
 
@@ -183,7 +185,7 @@ app.post("/register", (req, res) => {
   let newUser = {
     id: generateRandomString(),
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(req.body.password, 10)
   };
 
   users[newUser.id] = newUser;
