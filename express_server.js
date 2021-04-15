@@ -55,7 +55,6 @@ app.get("/", (req, res) => {
 
 // Main page - Show URLs specific to user logged in
 app.get("/urls", (req, res) => {
-  console.log("req.session.userid", req.session.userid);
   const templateVars = { userURls: helpers.urlsForUser(req.session.userid, urlDatabase), urls: urlDatabase, users: users, userid: req.session.userid };
   res.render("urls_index", templateVars);
 });
