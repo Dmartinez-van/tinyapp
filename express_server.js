@@ -61,10 +61,7 @@ const generateRandomString = function() {
 
 // return true for duplicate, false for no duplicate
 const checkForDuplicate = function(newEmail) {
-  // console.log("check for ", newEmail, "in users databse------");
   for (const user in users) {
-    // console.log("Checking...", user);
-    // console.log("for...", newEmail);
     if (users[user].email === newEmail) {
       return true;
     }
@@ -74,12 +71,21 @@ const checkForDuplicate = function(newEmail) {
 
 // return urls for the specified id
 const urlsForUser = function(id) {
-  for (const user in users) {
-    if (users[user] === id) {
-      return user;
+  let myURLs = {};
+  for (const short in urlDatabase) {
+    if (id === urlDatabase[short].userID) {
+      myURLs[short] = urlDatabase[short].longURL;
     }
   }
+  return myURLs;
 };
+
+// const loginCheck = function(id) {
+//   if () {
+//     return true;
+//   }
+//   return false;
+// };
 
 //
 // Main Pages
@@ -89,25 +95,20 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
+// Main page - URLs specific to user logged in
 app.get("/urls", (req, res) => {
-  let personalURL = {};
-  console.log(urlDatabase);
-  
-  const templateVars = { urls: urlDatabase, users: users, userid: req.cookies['userid'] };
+  const templateVars = { userURls: urlsForUser(req.cookies['userid']), urls: urlDatabase, users: users, userid: req.cookies['userid'] };
   res.render("urls_index", templateVars);
 });
 
+// Register page
 app.get("/register", (req, res) => {
   const templateVars = { urls: urlDatabase.longURL, users: users, userid: req.cookies['userid'] };
   res.render("register", templateVars);
 });
 
-// Add a toggle option to select either http:// or https://
-// User must pick one of the other in order to create new shortURL
-// Apply this to Edit featuer as well
+// Create url page
 app.get("/urls/new", (req, res) => {
-  console.log("req.cookies", req.cookies);
-  // console.log("req.cookie", req.cookie);
   const templateVars = { users: users, userid: req.cookies['userid'] };
   if (req.cookies['userid']) {
     res.render("urls_new", templateVars);
@@ -116,26 +117,32 @@ app.get("/urls/new", (req, res) => {
   res.redirect("/login");
 });
 
+// After createing new URL, show this page
 app.get("/urls/:shortURL", (req, res) => {
-  // req.params.shortURL points to the ' :/shortURL ' in the url. Which is whatever we generated from the app.post generateRandomString() block.
   let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL].longURL;
-  // Set templateVars from the url provided from get method and the database
+  let longURL = urlsForUser(req.cookies['userid'])[shortURL];
+  // let longURL = urlDatabase[shortURL].longURL;
+  // const templateVars = { shortURL, longURL, users: users, userid: req.cookies['userid'] };
   const templateVars = { shortURL, longURL, users: users, userid: req.cookies['userid'] };
   res.render("urls_show", templateVars);
 });
 
+// Redirect user to longURL website
 app.get("/u/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL].longURL;
-  // USER MUST TYPE IN HTTP:// in order for this to work.
+  if (!req.cookies['userid']) {
+    res.send("Please go Login");
+  }
+  if (req.cookies['userid'] !== urlDatabase[shortURL].userID) {
+    res.send("This is not your link");
+  }
+  let longURL = urlsForUser(req.cookies['userid'])[shortURL];
   res.redirect(longURL);
 });
 
+// Display login page
 app.get("/login", (req, res) => {
-  let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL];
-  const templateVars = { shortURL, longURL, users: users, userid: req.cookies['userid'] };
+  const templateVars = { users: users, userid: req.cookies['userid'] };
   res.render("login", templateVars);
 });
 
@@ -162,7 +169,6 @@ app.post("/login", (req, res) => {
   res.send(`Error ${res.statusCode = 403}:` + "\nForbidden");
 });
 
-
 app.post("/logout", (req, res) => {
   res.clearCookie('userid');
   res.redirect("/urls");
@@ -172,6 +178,7 @@ app.post("/logout", (req, res) => {
 // Register & Create URLs
 //
 
+// New user register
 app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     res.status(400);
@@ -194,31 +201,35 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
+// Generate shortURL and add to urlDatabase along with the userID that created it
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  console.log("post", shortURL);
   // Grab whatever user enters into the form and set it as the value to the generated short URL key
   // body-parser is a middleware which is populating the req.body object
   urlDatabase[shortURL] = {};
   urlDatabase[shortURL].longURL = req.body.longURL;
   urlDatabase[shortURL].userID = req.cookies.userid;
   
-  res.redirect(`/urls/${shortURL}`);
+  res.redirect(`/urls`);
 });
 
+// Edit
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  urlDatabase[shortURL].longURL = req.body.longURL;
+  if (req.cookies.userid === urlDatabase[req.params.shortURL].userID) {
+    urlDatabase[shortURL].longURL = req.body.longURL;
+  }
   res.redirect('/urls');
 });
-
 
 //
 // Delete
 //
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  if (req.cookies.userid === urlDatabase[req.params.shortURL].userID) {
+    delete urlDatabase[req.params.shortURL];
+  }
   res.redirect("/urls");
 });
 

@@ -10,6 +10,7 @@
 
 <body>
   <%- include ('partials/_header') %>
+  <% if (userid) { %>
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
@@ -24,6 +25,9 @@
                 style="background-color:aquamarine ;width: 300px; margin:10px">
               <button type="submit" style="margin: 1em" class="btn btn-primary">Submit</button>
             </form>
+  <% } else { %>
+    <h3>This doesn't belong to you</h3>
+  <% } %>
         </div>
       </div>
       <div class="card-footer text-muted"></div>
