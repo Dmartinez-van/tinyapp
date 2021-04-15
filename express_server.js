@@ -1,9 +1,9 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+
 const app = express();
 const PORT = 8080;
-
 
 //
 // Middleware
@@ -29,10 +29,6 @@ const urlDatabase = {
   },
   "9sm5xK": {
     longURL: "http://www.google.com",
-    userID: "testUser"
-  },
-  "SVB-Twitch": {
-    longURL: "https://www.twitch.tv/owsvb",
     userID: "testUser"
   }
 };
@@ -69,7 +65,7 @@ const checkForDuplicate = function(newEmail) {
   return false;
 };
 
-// return urls for the specified id
+// return urls for the specified id in an object
 const urlsForUser = function(id) {
   let myURLs = {};
   for (const short in urlDatabase) {
@@ -79,13 +75,6 @@ const urlsForUser = function(id) {
   }
   return myURLs;
 };
-
-// const loginCheck = function(id) {
-//   if () {
-//     return true;
-//   }
-//   return false;
-// };
 
 //
 // Main Pages
@@ -121,8 +110,6 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = urlsForUser(req.cookies['userid'])[shortURL];
-  // let longURL = urlDatabase[shortURL].longURL;
-  // const templateVars = { shortURL, longURL, users: users, userid: req.cookies['userid'] };
   const templateVars = { shortURL, longURL, users: users, userid: req.cookies['userid'] };
   res.render("urls_show", templateVars);
 });
@@ -204,8 +191,6 @@ app.post("/register", (req, res) => {
 // Generate shortURL and add to urlDatabase along with the userID that created it
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  // Grab whatever user enters into the form and set it as the value to the generated short URL key
-  // body-parser is a middleware which is populating the req.body object
   urlDatabase[shortURL] = {};
   urlDatabase[shortURL].longURL = req.body.longURL;
   urlDatabase[shortURL].userID = req.cookies.userid;

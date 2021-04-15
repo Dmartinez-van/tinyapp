@@ -1,8 +1,7 @@
 <header>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
     <a class="navbar-brand" href="/urls">TinyApp</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
@@ -10,17 +9,14 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <% if(userid) { %>
-          <h5 class="card-title mr-sm-2" style="margin: auto; padding-right: 5px;">Logged In As: <%= users[userid].email %>
-          </h5>
-          <form class="form-inline" action="/logout" method="POST">
-            <button type="submit" class="btn btn-secondary">Logout</button>
-            
-          </form>
+          <h5 class="card-title mr-sm-2" style="margin: auto; padding-right: 5px;">Logged In As: <%= users[userid].email%></h5>
+            <form class="form-inline" action="/logout" method="POST">
+              <button type="submit" class="btn btn-secondary">Logout</button>
+            </form>
           <% } else { %>
             <form class="form-inline" action="/login" method="GET">
               <button type="submit" class="btn btn-primary">Login</button>
             </form>
-
             <form class="form-inline" action="/register" method="GET">
               <button style="margin-left: 10px;" type="submit" class="btn btn-primary">Register</button>
             </form>
