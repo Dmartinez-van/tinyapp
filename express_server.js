@@ -1,5 +1,4 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcrypt');
 const helpers = require('./helpers');
@@ -11,10 +10,10 @@ const PORT = 8080;
 // Middleware
 //
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
-  keys: ['key 1'],
+  keys: ['key 1', '42 is an amazing number'],
 
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -56,6 +55,7 @@ app.get("/", (req, res) => {
 
 // Main page - Show URLs specific to user logged in
 app.get("/urls", (req, res) => {
+  console.log("req.session.userid", req.session.userid);
   const templateVars = { userURls: helpers.urlsForUser(req.session.userid, urlDatabase), urls: urlDatabase, users: users, userid: req.session.userid };
   res.render("urls_index", templateVars);
 });
@@ -79,16 +79,26 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = helpers.urlsForUser(req.session.userid, urlDatabase)[shortURL];
+  
+  if (!urlDatabase[shortURL]) {
+    return res.send("This is an invalid shorten URL");
+  }
+  
   if (req.session.userid === urlDatabase[shortURL].userID) {
     const templateVars = { shortURL, longURL, users: users, userid: req.session.userid };
     return res.render("urls_show", templateVars);
   }
+
   return res.send("You did not create this link, so you may not Edit it");
 });
 
 // Redirect user to longURL website - Redirect users not logged in / Or those who did not create the link
 app.get("/u/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
+  
+  if (!urlDatabase[shortURL]) {
+    return res.send("This is an invalid shorten URL");
+  }
   if (!req.session.userid) {
     return res.send("Please go Login");
   }
@@ -170,11 +180,13 @@ app.post("/register", (req, res) => {
 // Create shortURL and add to urlDatabase along with the userID that created it
 app.post("/urls", (req, res) => {
   let shortURL = helpers.generateRandomString();
-  urlDatabase[shortURL] = {};
-  urlDatabase[shortURL].longURL = req.body.longURL;
-  urlDatabase[shortURL].userID = req.session.userid;
-  
-  res.redirect(`/urls/${shortURL}`);
+  if (req.session.userid) {
+    urlDatabase[shortURL] = {};
+    urlDatabase[shortURL].longURL = req.body.longURL;
+    urlDatabase[shortURL].userID = req.session.userid;
+    return res.redirect(`/urls/${shortURL}`);
+  }
+  return res.status(403).send(`Error ${res.statusCode}: Only signed in users may create shortened URLs.`);
 });
 
 // Edit the longURL that a specific shortURL points towards - Disallow others from editing
