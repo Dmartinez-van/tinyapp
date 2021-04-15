@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcrypt');
+const helpers = require('./helpers');
 
 const app = express();
 const PORT = 8080;
@@ -44,44 +45,6 @@ const urlDatabase = {
 const users = {};
 
 //
-// Function(s)
-//
-
-const generateRandomString = function() {
-  let randString = (Math.random() + 1).toString(36).substring(2, 8);
-  return randString;
-};
-
-// return true for duplicate, false for no duplicate
-const checkForDuplicate = function(newEmail) {
-  for (const user in users) {
-    if (users[user].email === newEmail) {
-      return true;
-    }
-  }
-  return false;
-};
-
-// return urls for the specified id in an object
-const urlsForUser = function(id) {
-  let myURLs = {};
-  for (const short in urlDatabase) {
-    if (id === urlDatabase[short].userID) {
-      myURLs[short] = urlDatabase[short].longURL;
-    }
-  }
-  return myURLs;
-};
-
-const getUserByEmail = function(email) {
-  for (const userID in users) {
-    if (users[userID].email === email) {
-      return userID;
-    }
-  }
-};
-
-//
 // Main Pages
 //
 
@@ -94,7 +57,7 @@ app.get("/", (req, res) => {
 
 // Main page - URLs specific to user logged in
 app.get("/urls", (req, res) => {
-  const templateVars = { userURls: urlsForUser(req.session.userid), urls: urlDatabase, users: users, userid: req.session.userid };
+  const templateVars = { userURls: helpers.urlsForUser(req.session.userid, urlDatabase), urls: urlDatabase, users: users, userid: req.session.userid };
   console.log("users database -> ", users);
   res.render("urls_index", templateVars);
 });
@@ -117,7 +80,7 @@ app.get("/urls/new", (req, res) => {
 // After createing new URL, show this page
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = urlsForUser(req.session.userid)[shortURL];
+  let longURL = helpers.urlsForUser(req.session.userid, urlDatabase)[shortURL];
   if (req.session.userid === urlDatabase[shortURL].userID) {
     const templateVars = { shortURL, longURL, users: users, userid: req.session.userid };
     return res.render("urls_show", templateVars);
@@ -134,7 +97,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (req.session.userid !== urlDatabase[shortURL].userID) {
     return res.send("This is not your link, so you may not Use it");
   }
-  let longURL = urlsForUser(req.session.userid)[shortURL];
+  let longURL = helpers.urlsForUser(req.session.userid, urlDatabase)[shortURL];
   res.redirect(longURL);
 });
 
@@ -149,7 +112,7 @@ app.get("/login", (req, res) => {
 //
 
 app.post("/login", (req, res) => {
-  let userID = getUserByEmail(req.body.email);
+  let userID = helpers.getUserByEmail(req.body.email, users);
   
   if (!req.body.email || !req.body.password) {
     return res.send(`Error ${res.statusCode = 403}:` + "Missing login information. Please enter an email and password to login");
@@ -159,7 +122,7 @@ app.post("/login", (req, res) => {
     return res.send(`Error ${res.statusCode = 403}:` + "Login does not exist. Please go register");
   }
 
-  if (!getUserByEmail(req.body.email)) {
+  if (!helpers.getUserByEmail(req.body.email, users)) {
     return res.send(`Error ${res.statusCode = 403}:` + "Email is not in our systems. Go register.");
   }
   
@@ -190,13 +153,13 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.send(`Error ${res.statusCode}\nPlease ensure the email and password fields are filled out.`);
   }
-  if (checkForDuplicate(req.body.email)) {
+  if (helpers.checkForDuplicate(req.body.email, users)) {
     res.status(400);
     return res.send(`Error ${res.statusCode}\nThis email has already been registered.`);
   }
 
   let newUser = {
-    id: generateRandomString(),
+    id: helpers.generateRandomString(),
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 10)
   };
@@ -208,7 +171,7 @@ app.post("/register", (req, res) => {
 
 // Generate shortURL and add to urlDatabase along with the userID that created it
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
+  let shortURL = helpers.generateRandomString();
   urlDatabase[shortURL] = {};
   urlDatabase[shortURL].longURL = req.body.longURL;
   urlDatabase[shortURL].userID = req.session.userid;
