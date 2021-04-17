@@ -74,11 +74,16 @@ app.get("/urls/new", (req, res) => {
 // Results page of shortened URL creation - Disallow anyone besides who created it from viewing/editing link
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL].longURL;
-
+  
   if (!urlDatabase[shortURL]) {
-    return res.send("This is an invalid shorten URL");
+    return res.send(`Error ${res.statusCode = 404}: Link does not exist`);
   }
+  
+  if (!req.session.userid) {
+    return res.send(`Error ${res.statusCode = 403}: You must be logged in to view this page`);
+  }
+
+  let longURL = urlDatabase[shortURL].longURL;
 
   if (req.session.userid !== urlDatabase[shortURL].userID) {
     return res.send("You did not create this link, so you may not Edit it");
@@ -139,7 +144,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect("/login");
+  res.redirect("/urls");
 });
 
 //
@@ -183,6 +188,11 @@ app.post("/urls", (req, res) => {
 // Edit the longURL that a specific shortURL points towards - Disallow others from editing
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
+
+  if (!req.session.userid) {
+    return res.send(`Error ${res.statusCode = 403}:` + "You cannot not edit when you are not logged in.");
+  }
+
   if (req.session.userid === urlDatabase[req.params.shortURL].userID) {
     urlDatabase[shortURL].longURL = req.body.longURL;
   }
