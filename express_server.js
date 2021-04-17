@@ -39,7 +39,7 @@ const users = {};
 
 app.get("/", (req, res) => {
   if (req.session.userid) {
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
   res.redirect("/login");
 });
@@ -139,7 +139,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 //
@@ -196,7 +196,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (req.session.userid === urlDatabase[req.params.shortURL].userID) {
     delete urlDatabase[req.params.shortURL];
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
   return res.status(400).send(`Error ${res.statusCode}: You do not have privallges to do this action.`);
 });
