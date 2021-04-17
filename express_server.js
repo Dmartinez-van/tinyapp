@@ -44,8 +44,13 @@ app.get("/", (req, res) => {
   res.redirect("/login");
 });
 
-// Main page - Show URLs specific to user logged in
+// Main page - Show URLs specific to user logged in / redirect not logged in users to login page
 app.get("/urls", (req, res) => {
+
+  if (!req.session.userid) {
+    return res.send(`Error ${res.statusCode = 403}: You must be logged in to view the URLs page`);
+  }
+
   let urls = helpers.urlsForUser(req.session.userid, urlDatabase);
   const templateVars = { urls: urls, users: users, userid: req.session.userid };
   res.render("urls_index", templateVars);
