@@ -29,16 +29,7 @@ app.set("view engine", "ejs");
 // Databases
 //
 
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "testUser"
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "testUser"
-  }
-};
+const urlDatabase = {};
 
 const users = {};
 
@@ -55,7 +46,8 @@ app.get("/", (req, res) => {
 
 // Main page - Show URLs specific to user logged in
 app.get("/urls", (req, res) => {
-  const templateVars = { userURls: helpers.urlsForUser(req.session.userid, urlDatabase), urls: urlDatabase, users: users, userid: req.session.userid };
+  let urls = helpers.urlsForUser(req.session.userid, urlDatabase);
+  const templateVars = { urls: urls, users: users, userid: req.session.userid };
   res.render("urls_index", templateVars);
 });
 
@@ -77,18 +69,18 @@ app.get("/urls/new", (req, res) => {
 // Results page of shortened URL creation - Disallow anyone besides who created it from viewing/editing link
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = helpers.urlsForUser(req.session.userid, urlDatabase)[shortURL];
-  
+  let longURL = urlDatabase[shortURL].longURL;
+
   if (!urlDatabase[shortURL]) {
     return res.send("This is an invalid shorten URL");
   }
-  
-  if (req.session.userid === urlDatabase[shortURL].userID) {
-    const templateVars = { shortURL, longURL, users: users, userid: req.session.userid };
-    return res.render("urls_show", templateVars);
-  }
 
-  return res.send("You did not create this link, so you may not Edit it");
+  if (req.session.userid !== urlDatabase[shortURL].userID) {
+    return res.send("You did not create this link, so you may not Edit it");
+  }
+  
+  const templateVars = { shortURL, longURL: longURL, users: users, userid: req.session.userid };
+  res.render("urls_show", templateVars);
 });
 
 // Redirect user to longURL website - Redirect users not logged in / Or those who did not create the link
@@ -98,13 +90,8 @@ app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[shortURL]) {
     return res.send("This is an invalid shorten URL");
   }
-  if (!req.session.userid) {
-    return res.send("Please go Login");
-  }
-  if (req.session.userid !== urlDatabase[shortURL].userID) {
-    return res.send("This is not your link, so you may not Use it");
-  }
-  let longURL = helpers.urlsForUser(req.session.userid, urlDatabase)[shortURL];
+
+  let longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
