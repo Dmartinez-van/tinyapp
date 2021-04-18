@@ -4,7 +4,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Landing Page - With Custom URL(s)"](https://github.com/Dmartinez-van/tinyapp/blob/master/docs/Main%20-%20Logged%20In.png)
+!["Landing Page - With Custom URL(s)"](https://github.com/Dmartinez-van/tinyapp/blob/master/docs/Main%20v2.png)
 !["Create TinyURL Page "](https://github.com/Dmartinez-van/tinyapp/blob/master/docs/Create%20TinyURL.png)
 !["Resultant TinyURL Link "](https://github.com/Dmartinez-van/tinyapp/blob/master/docs/Result%20TinyURL.png)
 
